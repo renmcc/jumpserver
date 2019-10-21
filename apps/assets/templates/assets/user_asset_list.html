@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/ztree/awesomeStyle/awesome.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'js/plugins/ztree/jquery.ztree.all.min.js' %}"></script>
+    <script src="{% static 'js/jquery.form.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="wrapper wrapper-content">
+   <div class="row">
+       {% include 'users/_granted_assets.html' %}
+   </div>
+</div>
+
+{% include 'assets/_user_asset_detail_modal.html' %}
+{% endblock %}
+
+
+{% block custom_foot_js %}
+<script>
+var treeUrl = "{% url 'api-perms:my-nodes-as-tree' %}?&cache_policy=1";
+var assetTableUrl = "{% url 'api-perms:my-assets' %}?cache_policy=1";
+var selectUrl = '{% url "api-perms:my-node-assets" node_id=DEFAULT_PK %}?cache_policy=1&all=1';
+var showAssetHref = false; // Need input default true
+var actions = {
+    targets: 4, createdCell: function (td, cellData) {
+       var conn_btn = '<a href="{% url "luna-view" %}?login_to=' + cellData +
+           '" class="btn btn-xs btn-primary">{% trans "Connect" %}</a>';
+       $(td).html(conn_btn)
+}};
+$(document).ready(function () {
+    initTree();
+    initTable();
+}).on('click', '.labels li', function () {
+    var val = $(this).text();
+    $("#user_assets_table_filter input").val(val);
+    assetTable.search(val).draw();
+ })
+.on('click', '.asset-detail', function(e) {
+    e.preventDefault();
+    var data = assetTable.ajax.json();
+    var assetId = $(this).data("asset");
+    var trs = '';
+    var desc = {
+        'hostname': "{% trans 'Hostname' %}",
+        'ip': "{% trans 'IP' %}",
+        'protocols': "{% trans 'Protocols' %}",
+        'platform': "{% trans 'Platform' %}",
+        'system_users_join': "{% trans 'System user' %}",
+        'domain': "{% trans 'Domain' %}",
+    };
+    var value;
+    for (var i = 0; i < data.results.length; i++) {
+        value = data.results[i];
+        if(value.id === assetId){
+            for(var i in desc){
+                trs += "<tr class='no-borders-tr'>\n" +
+                  "<td>"+ desc[i] + ":</td>"+
+                  "<td><b>"+ (value[i] === null?'':value[i]) + "</b></td>\n" +
+                  "</tr>";
+            }
+         break
+        }
+    };
+    $('#asset_detail_tbody').html(trs)
+    $('#user_asset_detail_modal').modal();
+});
+
+function toggle() {
+    if (show === 0) {
+        $("#split-left").hide(500, function () {
+            $("#split-right").attr("class", "col-lg-12");
+            $("#toggle-icon").attr("class", "fa fa-angle-right fa-x");
+            show = 1;
+        });
+    } else {
+        $("#split-right").attr("class", "col-lg-9");
+        $("#toggle-icon").attr("class", "fa fa-angle-left fa-x");
+        $("#split-left").show(500);
+        show = 0;
+    }
+}
+
+</script>
+{% endblock %}
