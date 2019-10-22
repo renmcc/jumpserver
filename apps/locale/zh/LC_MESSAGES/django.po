@@ -2484,6 +2484,12 @@ msgstr "改变世界，从一点点开始。"
 msgid "Login"
 msgstr "登录"
 
+#: authentication/templates/authentication/login.html:48
+msgid "Loginlogo"
+msgstr "SA运维管理后台"
+
+
+
 #: authentication/templates/authentication/login.html:54
 #: authentication/templates/authentication/new_login.html:80
 msgid "The user password has expired"
